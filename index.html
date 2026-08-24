@@ -29,6 +29,23 @@ body{font-family:var(--sans);background:#0B0D10;color:var(--ink);line-height:1.5
 .scrim-bot{position:absolute;bottom:0;left:0;right:0;height:420px;z-index:5;pointer-events:none;
   background:linear-gradient(0deg,rgba(0,0,0,.82) 0%,rgba(0,0,0,.45) 42%,transparent 100%);}
 
+/* tap to unmute button overlay */
+.unmute-btn{
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:30;
+  background:rgba(0,0,0,0.72);backdrop-filter:blur(8px);color:#fff;
+  border:1.5px solid rgba(255,255,255,0.3);padding:12px 22px;border-radius:30px;
+  font-family:var(--sans);font-size:14px;font-weight:700;letter-spacing:.02em;
+  display:flex;align-items:center;gap:9px;cursor:pointer;
+  box-shadow:0 6px 24px rgba(0,0,0,0.6);animation:pulseSound 1.8s infinite;
+  transition:opacity .25s ease, transform .25s ease;
+}
+.unmute-btn:active{transform:translate(-50%,-50%) scale(0.94);}
+.unmute-btn.hidden{display:none!important;}
+@keyframes pulseSound{
+  0%,100%{transform:translate(-50%,-50%) scale(1);}
+  50%{transform:translate(-50%,-50%) scale(1.06);}
+}
+
 /* header logo */
 .top{position:absolute;top:0;left:0;right:0;z-index:20;padding:12px 14px 0;}
 .top-row{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;}
@@ -256,11 +273,8 @@ body{font-family:var(--sans);background:#0B0D10;color:var(--ink);line-height:1.5
 <!-- ================= LIVE STAGE ================= -->
 <div class="stage" id="stage">
 
-  <!-- ===== VIDEO SLOT =====
-       Drop your host video next to this file and name it host-video.mp4
-       (portrait 9:16 works best). If the file is missing, the animated
-       fallback scene below is shown instead. -->
-  <video id="stream" autoplay loop playsinline
+  <!-- ===== VIDEO SLOT ===== -->
+  <video id="stream" autoplay loop playsinline muted
          poster=""
          onerror="this.style.display='none'">
     <source src="host-video.mp4" type="video/mp4">
@@ -269,6 +283,15 @@ body{font-family:var(--sans);background:#0B0D10;color:var(--ink);line-height:1.5
 
   <div class="scrim-top"></div>
   <div class="scrim-bot"></div>
+
+  <!-- TAP TO UNMUTE OVERLAY BUTTON -->
+  <button class="unmute-btn" id="unmuteBtn" onclick="toggleAudio(event)" aria-label="Unmute Video">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+      <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+      <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+    </svg>
+    <span>Tap for Sound</span>
+  </button>
 
   <!-- header -->
   <div class="top">
@@ -694,26 +717,43 @@ function like(){
   document.getElementById('stage').appendChild(h);
   setTimeout(()=>h.remove(),2400);
 }
+
+/* ================= SOUND ENGINE ================= */
 function initSound(){
-  const v=document.getElementById('stream');
+  const v = document.getElementById('stream');
   if(!v) return;
-  v.volume=1;
-  v.muted=false;
-  const tryPlay=v.play();
-  if(tryPlay && tryPlay.catch){
-    tryPlay.catch(()=>{
-      /* browser blocked sound-on autoplay: start muted, unmute on first touch */
-      v.muted=true;
+  
+  v.muted = true;
+  v.play().catch(()=>{});
+
+  const enableAudio = function() {
+    toggleAudio();
+    ['click', 'touchend'].forEach(ev => {
+      document.removeEventListener(ev, enableAudio);
+    });
+  };
+
+  ['click', 'touchend'].forEach(ev => {
+    document.addEventListener(ev, enableAudio, { once: true });
+  });
+}
+
+function toggleAudio(e){
+  if(e) e.stopPropagation();
+  const v = document.getElementById('stream');
+  const btn = document.getElementById('unmuteBtn');
+  if(!v) return;
+
+  v.muted = false;
+  v.volume = 1.0;
+
+  if (v.paused) {
+    v.play().catch(() => {
+      v.muted = true;
       v.play().catch(()=>{});
-      const unmute=()=>{
-        v.muted=false; v.play().catch(()=>{});
-        ['pointerdown','touchstart','keydown','scroll'].forEach(ev=>
-          document.removeEventListener(ev,unmute,true));
-      };
-      ['pointerdown','touchstart','keydown','scroll'].forEach(ev=>
-        document.addEventListener(ev,unmute,true));
     });
   }
+  if(btn) btn.classList.add('hidden');
 }
 
 /* ================= PRODUCT LIST SHEET ================= */
@@ -866,8 +906,6 @@ setTimeout(pushToast, 2500);
 
 <!-- ============================================================
      QUALTRICS BEHAVIOURAL TRACKING
-     Sends interaction data to the parent page via postMessage.
-     Harmless if the prototype is opened outside Qualtrics.
      ============================================================ -->
 <script>
 (function(){
@@ -929,7 +967,6 @@ setTimeout(pushToast, 2500);
   wrap("add", function(id){ markAdd(); });
   wrap("addToCart", function(){ markAdd(); });
   wrap("addBundle", function(){ markAdd(); });
-  // capture basket BEFORE placeOrder clears it
   if(typeof window.placeOrder === "function"){
     var _po = window.placeOrder;
     window.placeOrder = function(){
