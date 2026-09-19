@@ -102,7 +102,8 @@ body{font-family:var(--sans);background:#0B0D10;color:var(--ink);line-height:1.5
   background:rgba(255,255,255,.97);backdrop-filter:blur(10px);border-radius:9px;padding:5px 6px;
   display:flex;gap:7px;align-items:center;box-shadow:0 4px 16px rgba(0,0,0,.28);cursor:pointer;}
 .pin-img{width:30px;height:36px;background:#F7F7F8;border-radius:4px;padding:2px;flex-shrink:0;}
-.pin-img svg{width:100%;height:100%;display:block;}
+.pin-img svg,.pin-img img{width:100%;height:100%;display:block;}
+.pin-img img{object-fit:contain;}
 .pin-b{flex:1;min-width:0;}
 .pin-tag{display:inline-block;background:var(--live);color:#fff;font-size:7.5px;font-weight:700;
   padding:1px 4px;border-radius:2px;letter-spacing:.04em;vertical-align:middle;}
@@ -129,7 +130,8 @@ body{font-family:var(--sans);background:#0B0D10;color:var(--ink);line-height:1.5
   cursor:pointer;font-family:var(--sans);text-align:left;}
 .pl-card:active{transform:scale(.97);}
 .pl-img{height:92px;background:#FAFAFB;border-radius:6px;padding:5px;}
-.pl-img svg{width:100%;height:100%;display:block;}
+.pl-img svg,.pl-img img{width:100%;height:100%;display:block;}
+.pl-img img{object-fit:contain;}
 .pl-cat{font-size:9.5px;color:var(--faint);font-weight:600;letter-spacing:.05em;text-transform:uppercase;margin-top:7px;}
 .pl-name{font-size:12px;font-weight:500;line-height:1.28;margin-top:2px;height:31px;overflow:hidden;}
 .pl-rate{display:flex;align-items:center;gap:3px;margin-top:4px;}
@@ -156,12 +158,14 @@ body{font-family:var(--sans);background:#0B0D10;color:var(--ink);line-height:1.5
   background:var(--bg);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:3;}
 .sheet-pad{padding:6px 16px 22px;}
 .sh-img{height:210px;background:#FAFAFB;border-radius:10px;padding:12px;margin-bottom:14px;}
-.sh-img svg{width:100%;height:100%;display:block;}
+.sh-img svg,.sh-img img{width:100%;height:100%;display:block;}
+.sh-img img{object-fit:contain;}
 .sh-thumbs{display:flex;gap:6px;margin:-8px 0 14px;}
 .sh-thumb{width:46px;height:46px;border:1.5px solid var(--line);border-radius:5px;background:#FAFAFB;
   padding:3px;cursor:pointer;}
 .sh-thumb.act{border-color:var(--blue);}
-.sh-thumb svg{width:100%;height:100%;display:block;}
+.sh-thumb svg,.sh-thumb img{width:100%;height:100%;display:block;}
+.sh-thumb img{object-fit:contain;}
 .sh-brand{font-size:11px;color:var(--faint);font-weight:600;letter-spacing:.06em;text-transform:uppercase;}
 .sh-name{font-size:17px;font-weight:600;line-height:1.3;margin-top:3px;}
 .sh-size{font-size:12.5px;color:var(--muted);margin-top:2px;}
@@ -209,7 +213,8 @@ body{font-family:var(--sans);background:#0B0D10;color:var(--ink);line-height:1.5
 .bundle-h span{font-size:12.5px;font-weight:700;color:var(--deal);}
 .bundle-row{display:flex;align-items:center;gap:8px;}
 .bundle-row .bi{width:44px;height:52px;background:#fff;border-radius:5px;padding:3px;}
-.bundle-row .bi svg{width:100%;height:100%;display:block;}
+.bundle-row .bi svg,.bundle-row .bi img{width:100%;height:100%;display:block;}
+.bundle-row .bi img{object-fit:contain;}
 .bundle-t{flex:1;font-size:11.5px;color:var(--muted);line-height:1.3;}
 .bundle-p{text-align:right;}
 .bundle-p .o{font-size:11px;color:var(--faint);text-decoration:line-through;}
@@ -232,7 +237,8 @@ body{font-family:var(--sans);background:#0B0D10;color:var(--ink);line-height:1.5
 .btn.secondary{background:var(--surface);color:var(--ink);border:1.5px solid var(--ink);}
 .li{display:flex;gap:12px;padding:13px 0;border-bottom:1px solid var(--line);}
 .li-img{width:62px;height:76px;flex-shrink:0;background:#FAFAFB;border:1px solid var(--line);border-radius:5px;padding:5px;}
-.li-img svg{width:100%;height:100%;display:block;}
+.li-img svg,.li-img img{width:100%;height:100%;display:block;}
+.li-img img{object-fit:contain;}
 .li-b{flex:1;min-width:0;}
 .li-brand{font-size:10.5px;color:var(--faint);font-weight:600;text-transform:uppercase;letter-spacing:.04em;}
 .li-name{font-size:13.5px;font-weight:500;line-height:1.3;margin-top:1px;}
@@ -546,14 +552,21 @@ function fallbackScene(){
   '<text x="200" y="716" text-anchor="middle" font-family="Inter,sans-serif" font-size="9.5" fill="rgba(255,255,255,.28)">add host-video.mp4 beside this file</text></svg>';
 }
 
+/* ================= PRODUCT IMAGES ================= */
+const IMAGE_DIR = 'images/';
+function productImg(file, alt){
+  return '<img src="'+IMAGE_DIR+file+'" alt="'+(alt||'Product image')+'" loading="lazy">';
+}
+
 /* ================= CATALOG ================= */
 const P = {
   sun:{id:'sun',brand:'SOLA',cat:'Sun care',short:'Daily Face Sunscreen SPF 50+',
     name:'Daily Face Sunscreen SPF 50+',size:'50 ml · Broad-spectrum UVA/UVB',price:14.99,unit:'€29.98 per 100 ml',
-    rate:4.8,revs:50,art:()=>tube('#C8892F','#FDFCFA','SOLA','#C8892F','#232120'),
-    gallery:[()=>tube('#C8892F','#FDFCFA','SOLA','#C8892F','#232120'),
-             ()=>texShot('#F4F1EC','#FCFAF6','#E3DCD1','TEXTURE'),
-             ()=>lifeShot('#EAF1F4','#F6D79A','#E8C9AC','#3E3630','EVERY MORNING')],
+    rate:4.8,revs:50,art:()=>productImg('sola-sun.png','SOLA Daily Face Sunscreen SPF 50+'),
+    gallery:[()=>productImg('sola-sun.png','SOLA sunscreen'),
+             ()=>productImg('sola-sun1.png','SOLA sunscreen image 2'),
+             ()=>productImg('sola-sun2.png','SOLA sunscreen image 3'),
+             ()=>productImg('sola-sun3.png','SOLA sunscreen image 4')],
     desc:'A lightweight daily sunscreen for the face. The fluid texture absorbs in seconds and leaves no white cast, so it works as the final step of a morning routine or under make-up.',
     feat:['Broad-spectrum SPF 50+ against UVA and UVB','Absorbs in under 30 seconds','No white cast on any skin tone','Fragrance-free, suitable for sensitive skin'],
     reviews:[
@@ -569,8 +582,8 @@ const P = {
 
   cleanser:{id:'cleanser',brand:'SOLA',cat:'Cleansing',short:'Gentle Cleansing Gel',
     name:'Gentle Cleansing Gel',size:'150 ml',price:9.99,unit:'€6.66 per 100 ml',rate:4.6,revs:38,
-    art:()=>pump('#F4F7F5','#7FA894','SOLA','#3B4A42'),
-    gallery:[()=>pump('#F4F7F5','#7FA894','SOLA','#3B4A42'),()=>texShot('#EEF4F1','#FBFDFC','#D8E6DF','GEL TEXTURE')],
+    art:()=>productImg('sola-clean.png','SOLA Gentle Cleansing Gel'),
+    gallery:[()=>productImg('sola-clean.png','SOLA Gentle Cleansing Gel')],
     desc:'A low-foam gel cleanser that removes sunscreen and make-up without stripping the skin barrier.',
     feat:['Removes SPF and light make-up in one wash','pH-balanced, no sulphates','Leaves skin comfortable, not tight'],
     reviews:[{n:"Elif D.",s:5,d:"3 weeks ago",t:"Takes off sunscreen properly without needing a second cleanse."},
@@ -580,8 +593,8 @@ const P = {
 
   serum:{id:'serum',brand:'SOLA',cat:'Serums',short:'Hydrating Serum',
     name:'Hydrating Serum',size:'30 ml',price:19.99,unit:'€66.63 per 100 ml',rate:4.7,revs:64,
-    art:()=>dropper('#FBF3E9','#B98A52','SOLA','#5A4632'),
-    gallery:[()=>dropper('#FBF3E9','#B98A52','SOLA','#5A4632'),()=>texShot('#F8F2E9','#FDF9F2','#E8DCC9','SERUM TEXTURE')],
+    art:()=>productImg('sola-serum.png','SOLA Hydrating Serum'),
+    gallery:[()=>productImg('sola-serum.png','SOLA Hydrating Serum')],
     desc:'A hyaluronic acid serum for the step before moisturiser. Layers cleanly under sunscreen without pilling.',
     feat:['Three molecular weights of hyaluronic acid','Absorbs without tackiness','Layers under SPF and make-up'],
     reviews:[{n:"Priya N.",s:5,d:"2 weeks ago",t:"Layers perfectly under the SOLA sunscreen. No pilling at all."},
@@ -591,8 +604,8 @@ const P = {
 
   cream:{id:'cream',brand:'SOLA',cat:'Moisturisers',short:'Daily Moisturiser',
     name:'Daily Moisturiser',size:'50 ml',price:16.99,unit:'€33.98 per 100 ml',rate:4.5,revs:41,
-    art:()=>jar('#FAFAF7','#D8CFC0','SOLA','#4A453F'),
-    gallery:[()=>jar('#FAFAF7','#D8CFC0','SOLA','#4A453F'),()=>texShot('#F6F5F1','#FCFBF8','#E4E0D6','GEL-CREAM')],
+    art:()=>productImg('sola-moister.png','SOLA Daily Moisturiser'),
+    gallery:[()=>productImg('sola-moister.png','SOLA Daily Moisturiser')],
     desc:'A light gel-cream that hydrates without weighing skin down. Suitable for morning and evening.',
     feat:['Gel-cream texture for normal to combination skin','Ceramides and glycerin','Non-comedogenic'],
     reviews:[{n:"Hannah W.",s:5,d:"1 month ago",t:"Light enough for summer but still hydrating."},
@@ -602,8 +615,8 @@ const P = {
 
   lip:{id:'lip',brand:'SOLA',cat:'Lip care',short:'Lip Balm SPF 30',
     name:'Lip Balm SPF 30',size:'5 g',price:6.99,unit:'€139.80 per 100 g',rate:4.7,revs:96,
-    art:()=>stick('#FBEFE4','#D98C6A','LIP SPF30','#6A4632'),
-    gallery:[()=>stick('#FBEFE4','#D98C6A','LIP SPF30','#6A4632'),()=>texShot('#FAF0E8','#FDF7F1','#EBD9CB','BALM TEXTURE')],
+    art:()=>productImg('sola-lipbalm.png','SOLA Lip Balm SPF 30'),
+    gallery:[()=>productImg('sola-lipbalm.png','SOLA Lip Balm SPF 30')],
     desc:'A protective lip balm with SPF 30, for the step people usually forget. Non-sticky and unscented.',
     feat:['SPF 30 protection for lips','Shea butter and vitamin E','Non-sticky, no shimmer'],
     reviews:[{n:"Zoe P.",s:5,d:"1 week ago",t:"The only lip SPF I've found that isn't sticky."},
@@ -613,8 +626,8 @@ const P = {
 
   body:{id:'body',brand:'SOLA',cat:'Body care',short:'Body Lotion',
     name:'Body Lotion',size:'200 ml',price:12.99,unit:'€6.50 per 100 ml',rate:4.4,revs:73,
-    art:()=>bottleTall('#F7F9FA','#9DBDC9','SOLA','#3D5560'),
-    gallery:[()=>bottleTall('#F7F9FA','#9DBDC9','SOLA','#3D5560'),()=>texShot('#F1F6F8','#FBFDFE','#DCE8ED','LOTION TEXTURE')],
+    art:()=>productImg('sola-body.png','SOLA Body Lotion'),
+    gallery:[()=>productImg('sola-body.png','SOLA Body Lotion')],
     desc:'A fast-absorbing body lotion for daily use after showering. Light enough to dress straight after.',
     feat:['Absorbs in about a minute','Fragrance-free','Ceramides for dry skin'],
     reviews:[{n:"Bea M.",s:4,d:"2 weeks ago",t:"Light and quick. Not rich enough for very dry legs in winter."},
@@ -624,8 +637,8 @@ const P = {
 
   hand:{id:'hand',brand:'SOLA',cat:'Hand care',short:'Hand Cream',
     name:'Hand Cream',size:'75 ml',price:7.99,unit:'€10.65 per 100 ml',rate:4.6,revs:58,
-    art:()=>tube('#8FA88C','#F6F8F5','SOLA','#5B7357','#39463A','HANDS'),
-    gallery:[()=>tube('#8FA88C','#F6F8F5','SOLA','#5B7357','#39463A','HANDS'),()=>texShot('#F1F5F0','#FBFDFA','#DFE7DC','CREAM TEXTURE')],
+    art:()=>productImg('sola-hand.png','SOLA Hand Cream'),
+    gallery:[()=>productImg('sola-hand.png','SOLA Hand Cream')],
     desc:'A pocket-sized hand cream that sinks in without leaving a film. Made for frequent washing.',
     feat:['Non-greasy finish','Glycerin and panthenol','Fits in a pocket or bag'],
     reviews:[{n:"Ines T.",s:5,d:"1 week ago",t:"Absorbs immediately, I can use my phone right after."},
@@ -635,8 +648,8 @@ const P = {
 
   eye:{id:'eye',brand:'SOLA',cat:'Eye care',short:'Eye Cream',
     name:'Eye Cream',size:'15 ml',price:22.99,unit:'€153.27 per 100 ml',rate:4.5,revs:47,
-    art:()=>jar('#FAF6F0','#C9B79E','SOLA','#5A4E3F',.72),
-    gallery:[()=>jar('#FAF6F0','#C9B79E','SOLA','#5A4E3F',.72),()=>texShot('#F7F3ED','#FDFAF5','#E8DFD0','RICH TEXTURE')],
+    art:()=>productImg('sola-eye.png','SOLA Eye Cream'),
+    gallery:[()=>productImg('sola-eye.png','SOLA Eye Cream')],
     desc:'A caffeine and peptide eye cream for the morning routine. Layers under concealer without creasing.',
     feat:['Caffeine and peptides','Does not crease under concealer','Ophthalmologist tested'],
     reviews:[{n:"Lucia F.",s:5,d:"2 weeks ago",t:"No creasing under concealer, which was my main issue."},
