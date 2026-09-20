@@ -658,7 +658,7 @@ const P = {
     dist:[[5,64],[4,26],[3,7],[2,2],[1,1]]}
 };
 const ORDER=['sun','cleanser','serum','cream','lip','body','hand','eye'];
-const SHIP=3.95, FREE_OVER=25, BUNDLE_PRICE=19.99;
+const SHIP=3.95, FREE_OVER=25, BUNDLE_PRICE=19.99, BUNDLE_DISCOUNT=4.99;
 let cart={}, bundleOn=false, current='live', sheetPid=null, sheetGal=0, sheetMode='detail';
 
 /* ================= HELPERS ================= */
@@ -666,8 +666,10 @@ function eur(v){return '€'+v.toFixed(2);}
 function starRow(n){let h='';for(let i=1;i<=5;i++)
   h+='<svg viewBox="0 0 24 24" fill="'+(i<=Math.round(n)?'#F5A623':'none')+'" stroke="#F5A623" stroke-width="1.7" stroke-linejoin="round"><path d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>';
   return h;}
-function itemCount(){let n=0;for(const k in cart)n+=cart[k];return n+(bundleOn?2:0);}
-function subtotal(){let s=0;for(const k in cart)s+=P[k].price*cart[k];if(bundleOn)s+=BUNDLE_PRICE;return s;}
+function itemCount(){let n=0;for(const k in cart)n+=cart[k];return n;}
+function bundleQty(){return Math.min(cart.sun||0,cart.cleanser||0);}
+function bundleDiscount(){return bundleQty()*BUNDLE_DISCOUNT;}
+function subtotal(){let s=0;for(const k in cart)s+=P[k].price*cart[k];return s-bundleDiscount();}
 function shipCost(){return itemCount()===0?0:(subtotal()>=FREE_OVER?0:SHIP);}
 function total(){return subtotal()+shipCost();}
 function renderBadge(){const b=document.getElementById('badge'),n=itemCount();b.textContent=n;b.classList.toggle('on',n>0);}
@@ -845,7 +847,7 @@ function renderSheet(){
 function add(id){cart[id]=(cart[id]||0)+1;renderBadge();}
 function setQty(id,n){if(n<=0)delete cart[id];else cart[id]=Math.min(9,n);renderBadge();renderCart();
   if(itemCount()===0&&current==='checkout')go('cart');}
-function addBundle(){bundleOn=true;renderBadge();closeSheet();go('cart');}
+function addBundle(){cart.sun=(cart.sun||0)+1;cart.cleanser=(cart.cleanser||0)+1;bundleOn=false;renderBadge();closeSheet();go('cart');}
 
 function renderCart(){
   const el=document.getElementById('cartBody');
@@ -853,11 +855,11 @@ function renderCart(){
     el.innerHTML='<div class="empty"><p>Your cart is empty.</p><button class="btn secondary" onclick="go(\'live\')">Back to the live</button></div>';
     return;}
   let h='<h2 style="font-size:18px;font-weight:600;margin-bottom:10px;">Your items</h2>';
-  if(bundleOn){
-    h+='<div class="li"><div class="li-img">'+P.sun.art()+'</div><div class="li-b">'+
-      '<div class="li-brand">SOLA · Live bundle</div><div class="li-name">Daily Face Sunscreen + Gentle Cleansing Gel</div>'+
-      '<div class="li-price">'+eur(BUNDLE_PRICE)+' <span style="font-size:12px;color:var(--faint);text-decoration:line-through;font-weight:400;">€24.98</span></div>'+
-      '<button class="rm" onclick="bundleOn=false;renderBadge();renderCart();">Remove</button></div></div>';}
+  const bq=bundleQty();
+  if(bq){
+    h+='<div class="bundle" style="margin-bottom:12px;"><div class="bundle-h"><span>Live bundle applied</span><span style="font-size:11px;color:var(--deal);font-weight:600;">Save '+eur(bundleDiscount())+'</span></div>'+
+      '<div class="bundle-t">Sunscreen + Gentle Cleansing Gel · '+bq+' bundle'+(bq>1?'s':'')+'</div>'+
+      '<div style="font-size:11.5px;color:var(--muted);margin-top:4px;">Each pair is €19.99 instead of €24.98.</div></div>';}
   for(const id in cart){const p=P[id],q=cart[id];
     h+='<div class="li"><div class="li-img">'+p.art()+'</div><div class="li-b">'+
       '<div class="li-brand">'+p.brand+'</div><div class="li-name">'+p.short+'</div>'+
@@ -865,7 +867,8 @@ function renderCart(){
       '<div class="qty"><button onclick="setQty(\''+id+'\','+(q-1)+')">−</button><span>'+q+'</span><button onclick="setQty(\''+id+'\','+(q+1)+')">+</button></div><br>'+
       '<button class="rm" onclick="setQty(\''+id+'\',0)">Remove</button></div></div>';}
   h+='<div style="margin-top:16px;">'+
-    '<div class="tot"><span>Subtotal</span><span>'+eur(subtotal())+'</span></div>'+
+    '<div class="tot"><span>Subtotal</span><span>'+eur((()=>{let s=0;for(const k in cart)s+=P[k].price*cart[k];return s;})())+'</span></div>'+
+    (bundleDiscount()>0?'<div class="tot"><span>Live bundle discount</span><span style="color:var(--deal);">−'+eur(bundleDiscount())+'</span></div>':'')+
     '<div class="tot"><span>Delivery</span><span>'+(shipCost()===0?'Free':eur(shipCost()))+'</span></div>'+
     '<div class="tot grand"><span>Total</span><span>'+eur(total())+'</span></div></div>'+
     '<div style="margin-top:18px;display:flex;flex-direction:column;gap:8px;">'+
@@ -875,8 +878,8 @@ function renderCart(){
 }
 function renderCheckout(){
   let rows='';
-  if(bundleOn)rows+='<div class="tot"><span>Sunscreen + Cleansing Gel bundle</span><span>'+eur(BUNDLE_PRICE)+'</span></div>';
   for(const id in cart)rows+='<div class="tot"><span>'+P[id].short+' × '+cart[id]+'</span><span>'+eur(P[id].price*cart[id])+'</span></div>';
+  if(bundleDiscount()>0)rows+='<div class="tot"><span>Live bundle discount</span><span style="color:var(--deal);">−'+eur(bundleDiscount())+'</span></div>';
   rows+='<div class="tot"><span>Delivery</span><span>'+(shipCost()===0?'Free':eur(shipCost()))+'</span></div>';
   rows+='<div class="tot grand"><span>Total</span><span>'+eur(total())+'</span></div>';
   document.getElementById('coSummary').innerHTML=rows;
